@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ProspectEntry, ClientProfile } from './types';
 import { parseCSV, groupByClient } from './utils';
 import { Dashboard } from './components/Dashboard';
@@ -10,7 +10,15 @@ const App: React.FC = () => {
   const [profiles, setProfiles] = useState<ClientProfile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<ClientProfile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Vérification de la configuration au montage
+  useEffect(() => {
+    if (!process.env.API_KEY) {
+      console.warn("Attention: La variable d'environnement API_KEY n'est pas définie.");
+    }
+  }, []);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -18,10 +26,19 @@ const App: React.FC = () => {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const parsed = parseCSV(text);
-      setEntries(parsed);
-      setProfiles(groupByClient(parsed));
+      try {
+        const text = e.target?.result as string;
+        const parsed = parseCSV(text);
+        if (parsed.length === 0) {
+          setError("Le fichier semble vide ou mal formaté.");
+          return;
+        }
+        setEntries(parsed);
+        setProfiles(groupByClient(parsed));
+        setError(null);
+      } catch (err) {
+        setError("Erreur lors de la lecture du fichier CSV.");
+      }
     };
     reader.readAsText(file);
   };
@@ -30,6 +47,7 @@ const App: React.FC = () => {
     setEntries([]);
     setProfiles([]);
     setSelectedProfile(null);
+    setError(null);
   };
 
   if (selectedProfile) {
@@ -45,7 +63,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Navbar */}
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="bg-blue-600 p-2 rounded-lg">
@@ -64,6 +81,13 @@ const App: React.FC = () => {
       </nav>
 
       <main className="flex-1 container mx-auto px-4 py-8">
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3">
+            <i className="fa-solid fa-circle-exclamation"></i>
+            {error}
+          </div>
+        )}
+
         {profiles.length === 0 ? (
           <div className="max-w-2xl mx-auto mt-20 text-center">
             <div className="mb-8">
@@ -72,7 +96,7 @@ const App: React.FC = () => {
               </div>
               <h2 className="text-3xl font-extrabold text-slate-900 mb-3">Générez vos devis instantanément</h2>
               <p className="text-slate-600 text-lg">
-                Importez votre fichier d'audit énergétique (CSV ou Excel) pour créer des propositions photovoltaïques professionnelles.
+                Importez votre fichier d'audit énergétique (CSV) pour créer des propositions photovoltaïques professionnelles.
               </p>
             </div>
 
@@ -113,30 +137,6 @@ const App: React.FC = () => {
                 </div>
                 <div className="mt-4 bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-blue-200">
                   Sélectionner un fichier
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-              <div className="flex gap-4">
-                <div className="text-blue-500 mt-1"><i className="fa-solid fa-bolt"></i></div>
-                <div>
-                  <h4 className="font-bold text-slate-800">Calcul Automatique</h4>
-                  <p className="text-sm text-slate-500">Puissance max, conso journalière et dimensionnement kWc.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="text-blue-500 mt-1"><i className="fa-solid fa-robot"></i></div>
-                <div>
-                  <h4 className="font-bold text-slate-800">Analyse IA</h4>
-                  <p className="text-sm text-slate-500">Recommandations expertes générées par intelligence artificielle.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="text-blue-500 mt-1"><i className="fa-solid fa-file-pdf"></i></div>
-                <div>
-                  <h4 className="font-bold text-slate-800">Prêt à l'Emploi</h4>
-                  <p className="text-sm text-slate-500">Génération de documents PDF propres pour vos clients.</p>
                 </div>
               </div>
             </div>
