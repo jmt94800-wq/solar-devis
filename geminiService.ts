@@ -2,11 +2,11 @@
 import { GoogleGenAI } from "@google/genai";
 import { ClientProfile } from "./types";
 
-// On initialise le client au moment de l'appel pour être sûr que la clé est disponible
 const getAIClient = () => {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("API_KEY manquante dans l'environnement");
+    console.error("ERREUR CONFIGURATION : process.env.API_KEY est indéfini.");
+    throw new Error("Clé API manquante");
   }
   return new GoogleGenAI({ apiKey });
 };
@@ -37,9 +37,15 @@ export const getEnergyAnalysis = async (profile: ClientProfile) => {
       model: 'gemini-3-flash-preview',
       contents: prompt,
     });
+    
     return response.text;
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    return "L'analyse IA n'a pas pu être générée. Vérifiez votre configuration de clé API.";
+  } catch (error: any) {
+    console.group("Erreur Analyse IA");
+    console.error("Détails de l'erreur:", error);
+    if (error.message?.includes("API_KEY")) {
+      console.warn("Conseil : Vérifiez que votre clé API est bien injectée dans les variables d'environnement Vercel.");
+    }
+    console.groupEnd();
+    return `### Erreur de génération\nL'analyse IA n'a pas pu être générée.\n\n**Cause possible :** ${error.message || "Problème de configuration de la clé API"}.`;
   }
 };

@@ -11,12 +11,14 @@ const App: React.FC = () => {
   const [selectedProfile, setSelectedProfile] = useState<ClientProfile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isKeyMissing, setIsKeyMissing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Vérification de la configuration au montage
   useEffect(() => {
+    // Vérification de la clé API au démarrage
     if (!process.env.API_KEY) {
-      console.warn("Attention: La variable d'environnement API_KEY n'est pas définie.");
+      setIsKeyMissing(true);
+      console.warn("Diagnostic : API_KEY non détectée dans process.env");
     }
   }, []);
 
@@ -63,6 +65,16 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {isKeyMissing && (
+        <div className="bg-amber-500 text-white px-4 py-2 text-center text-sm font-medium no-print">
+          <i className="fa-solid fa-triangle-exclamation mr-2"></i>
+          Clé API non configurée. L'IA sera désactivée. 
+          <a href="https://vercel.com/docs/projects/environment-variables" target="_blank" className="underline ml-2 hover:text-amber-100">
+            Voir comment configurer sur Vercel
+          </a>
+        </div>
+      )}
+      
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="bg-blue-600 p-2 rounded-lg">
