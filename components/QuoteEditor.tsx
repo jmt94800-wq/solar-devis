@@ -219,7 +219,8 @@ export const QuoteEditor: React.FC<QuoteEditorProps> = ({ profile, onSave, onCan
                 <div className="col-span-1 text-center">Qté</div>
                 <div className="col-span-1 text-center">Crête ?</div>
                 <div className="col-span-2 text-right">P.U. HT (€)</div>
-                <div className="col-span-2 text-right">Total HT</div>
+                <div className="col-span-1 text-right">Total HT</div>
+                <div className="col-span-1 text-center">Actions</div>
               </div>
 
               {items.map((item) => (
@@ -283,11 +284,15 @@ export const QuoteEditor: React.FC<QuoteEditorProps> = ({ profile, onSave, onCan
                       <span className="absolute right-2 top-2.5 text-[10px] text-slate-400">€</span>
                     </div>
                   </div>
-                  <div className="col-span-2 flex items-center justify-between pl-4">
-                    <div className="text-sm font-black text-slate-900 text-right flex-1">
-                      {((item.unitPrice || 0) * item.quantite).toLocaleString(undefined, { minimumFractionDigits: 2 })} €
-                    </div>
-                    <button onClick={() => removeItem(item.id)} className="ml-4 text-slate-200 hover:text-red-500 transition-colors">
+                  <div className="col-span-1 text-sm font-black text-slate-900 text-right pr-2">
+                    {((item.unitPrice || 0) * item.quantite).toLocaleString(undefined, { minimumFractionDigits: 2 })} €
+                  </div>
+                  <div className="col-span-1 flex justify-center">
+                    <button 
+                      onClick={() => removeItem(item.id)} 
+                      title="Supprimer la ligne"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-red-600 hover:bg-red-50 transition-all"
+                    >
                       <i className="fa-solid fa-trash-can text-xs"></i>
                     </button>
                   </div>
