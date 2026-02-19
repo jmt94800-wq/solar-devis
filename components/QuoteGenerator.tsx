@@ -124,8 +124,7 @@ export const QuoteGenerator: React.FC<QuoteGeneratorProps> = ({ profile, config,
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-xs font-black text-slate-800">{specs.panelCount}</span>
-                <p className="text-[7px] text-slate-400 uppercase">Panneaux</p>
+                <i className="fa-solid fa-solar-panel text-slate-200 text-xl"></i>
               </div>
             </div>
             <div className="bg-slate-50 rounded-lg p-2 border border-slate-100 flex items-center justify-between">
